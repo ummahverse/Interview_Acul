@@ -1,7 +1,7 @@
 import prisma from "../libs/prisma.lib";
 
 import { Request, Response } from 'express';
-import { CreatePost, PostResponse } from '../types/post.type';
+import { CreatePost, GetPostsManyResponse, PostResponse } from '../types/post.type';
 import { createPostSchema, idSchemaPost } from "../validation/post.validate";
 import { UserAuth } from "../types/auth.type";
 
@@ -84,10 +84,51 @@ export const getPostById = async (req: Request, res: Response): Promise<void> =>
       data: postResponse,
     });
   } catch (err) {
-    res.status(500).json({
-      status: false,
-      message: 'An error occurred while fetching the post',
-      data: null,
-    });
+        throw err
   }
+};
+
+
+export const getPosts = async (req: Request, res: Response): Promise<void> => {
+
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const skip = (page - 1) * limit; 
+
+    try {
+        const posts = await prisma.post.findMany({
+            skip: skip,  
+            take: limit,
+            orderBy: {
+                created_at: 'desc', 
+            },
+        });
+
+        const totalPosts = await prisma.post.count();
+
+        const postResponse: PostResponse[] = posts.map(post => ({
+            id: post.id,
+            caption: post.caption,
+            user_id: post.user_id,
+            is_public: post.is_public,
+            location: post.location,
+            created_at: post.created_at,
+        }));
+
+        res.status(200).json({
+            status: true,
+            message: 'Posts fetched successfully',
+            data: {
+                posts: postResponse,
+                pagination: {
+                    totalPosts,
+                    currentPage: page,
+                    totalPages: Math.ceil(totalPosts / limit),
+                    limit,
+                },
+            },
+        });
+    } catch (err) {
+        throw err
+    }
 };
