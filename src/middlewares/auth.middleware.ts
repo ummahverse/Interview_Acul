@@ -2,6 +2,7 @@ import { type Response, Request, NextFunction } from "express";
 
 import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 import { UserAuth } from '../types/auth.type';
+import { ErrorWithStatusCode } from "../errors/error";
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY as string
 

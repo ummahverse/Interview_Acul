@@ -5,6 +5,7 @@ import * as YAML from 'yaml';
 import * as path from 'path'
 import * as swaggerUI from 'swagger-ui-express'
 import morgan from 'morgan';
+import { ErrorWithStatusCode } from "./errors/error";
 
 require('dotenv').config();
 

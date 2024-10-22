@@ -6,6 +6,7 @@ import argon2 from 'argon2';
 import { LoginResponse } from '../types/auth.type';
 import jwt from 'jsonwebtoken';
 import prisma from '../libs/prisma.lib';
+import { ErrorWithStatusCode } from '../errors/error';
 
 export const registerUser = async (req: Request, res: Response):Promise<void> => {
   const { error } = userRegister.validate(req.body);

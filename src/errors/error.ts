@@ -1,4 +1,4 @@
-class ErrorWithStatusCode extends Error {
+export class ErrorWithStatusCode extends Error {
     statusCode: number;
 
     constructor(message: string, statusCode: number) {

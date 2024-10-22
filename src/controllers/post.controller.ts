@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { CreatePost, GetPostsManyResponse, PostResponse } from '../types/post.type';
 import { createPostSchema, idSchemaPost } from "../validation/post.validate";
 import { UserAuth } from "../types/auth.type";
+import { ErrorWithStatusCode } from "../errors/error";
 
 export const createPost = async (req: Request, res: Response): Promise<void> => {
     const { error } = createPostSchema.validate(req.body);
