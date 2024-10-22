@@ -10,13 +10,6 @@ export const createPostSchema = Joi.object({
       'string.max': 'Caption must be less than or equal to 255 characters.',
       'any.required': 'Caption is required.',
     }),
-  
-  user_id: Joi.number().integer().required()
-    .messages({
-      'number.base': 'User ID must be a number.',
-      'number.integer': 'User ID must be an integer.',
-      'any.required': 'User ID is required.',
-    }),
 
   is_public: Joi.boolean().optional()
     .messages({
@@ -27,5 +20,15 @@ export const createPostSchema = Joi.object({
     .messages({
       'string.base': 'Location must be a string.',
       'string.max': 'Location must be less than or equal to 255 characters.',
+    })
+});
+
+
+export const idSchemaPost = Joi.object({
+  id: Joi.string().required()
+    .messages({
+      "string.base": "Post ID must be a string",
+      "string.empty": "Post ID is required",
+      "any.required": "Post ID is required",
     })
 });

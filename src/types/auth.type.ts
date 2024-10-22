@@ -1,14 +1,12 @@
 
 import { JwtPayload } from "jsonwebtoken";
 
-declare global {
-    namespace Express {
-      interface Request {
-        user?: JwtPayload | string;
-        token?: string;             
-      }
-    }
-  }
+
+export interface UserAuth extends Request {
+  user?: {
+    id: string;
+  };
+}
 
 export interface LoginResponse {
     status: boolean;
