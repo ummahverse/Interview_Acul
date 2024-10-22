@@ -20,7 +20,7 @@ export const registerUser = async (req: Request, res: Response):Promise<void> =>
 
   try {
     
-    await prisma.users.create({
+    const user = await prisma.users.create({
       data: {
         username : username,
         email : email,
@@ -28,6 +28,15 @@ export const registerUser = async (req: Request, res: Response):Promise<void> =>
         updated_at : new Date(), 
       },
     });
+
+
+    await prisma.database_history.create(
+      { data : {
+        user_id : user.id,
+        detail : 'new user',
+        type : 'REGISTRATION'
+      }}
+    )
 
     res.status(201).json({
       status: true,

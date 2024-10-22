@@ -33,6 +33,14 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
         location: newPost.location,
         created_at: newPost.created_at,
       };
+
+      await prisma.database_history.create(
+        { data : {
+          user_id : Number((req as unknown as UserAuth).user?.id),
+          detail : 'new post',
+          type : 'POST'
+        }}
+      )
   
       res.status(201).json({
         status: true,
