@@ -5,32 +5,35 @@ import * as YAML from 'yaml';
 import * as path from 'path'
 import * as swaggerUI from 'swagger-ui-express'
 import morgan from 'morgan';
-import { ErrorWithStatusCode } from "./errors/error";
+import { ErrorWithStatusCode, handleError } from "./errors/error";
 
 require('dotenv').config();
 
 const PORT = process.env.PORT as string
-const ENV = process.env.PORT as string
+const ENV = process.env.env as string
 
-const filePath: string = `${__dirname}/api-docs.yaml`;
-const fileContent: string = fs.readFileSync(filePath, 'utf-8');
-const parsedContent = YAML.parse(fileContent);
+const filePath: string = path.join(__dirname, 'api-docs.yaml'); 
 
-const swaggerDocument = YAML.parse(parsedContent);
+let swaggerDocument;
 
-
-const app : Express = express()
-
-if (ENV === 'development') {
-    app.use(morgan('dev'));
+try {
+    const fileContent: string = fs.readFileSync(filePath, 'utf-8');
+    swaggerDocument = YAML.parse(fileContent);
+} catch (error) {
+    process.exit(1);
 }
 
-app.get('/', (req : Request, res : Response) => {
-    res.send('Hello World!');
-})
+
+const app  = express()
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+if( ENV === "development"){
+  app.use(morgan("dev"))
+}
 app.use("/style.css", express.static(path.join(__dirname, "./style.css")))
 app.use(
-  "/v1/api-docs",
+  "/api/v1/docs",
   swaggerUI.serve,
   swaggerUI.setup(swaggerDocument, {
     customCssUrl: "/style.css",
@@ -40,20 +43,9 @@ app.use(
 app.use("/api/v1", api)
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    if (err instanceof ErrorWithStatusCode) {
-        res.status(err.statusCode).json({
-            status: false,
-            message: err.message,
-            data: null,
-        });    
-    } else {
-        res.status(500).json({
-            status: false,
-            message: ENV === 'production' ? 'Internal Server Error' : err.message,
-            data: null,
-        });      
-    }
-});
+    handleError(err, res)
+})
+
 
   //404
 app.use((req : Request, res : Response, next : NextFunction) => {
@@ -62,9 +54,11 @@ app.use((req : Request, res : Response, next : NextFunction) => {
       message: `are you lost? ${req.method} ${req.url} is not registered!`,
       data: null,
     });
-});
+})
 
 
 app.listen( PORT ,() => {
     console.log(`server is listening on port ${PORT}`)
 })
+
+export default app

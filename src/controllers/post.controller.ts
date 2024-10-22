@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { CreatePost, GetPostsManyResponse, PostResponse } from '../types/post.type';
 import { createPostSchema, idSchemaPost } from "../validation/post.validate";
 import { UserAuth } from "../types/auth.type";
-import { ErrorWithStatusCode } from "../errors/error";
+import { ErrorWithStatusCode, handleError } from "../errors/error";
 
 export const createPost = async (req: Request, res: Response): Promise<void> => {
     const { error } = createPostSchema.validate(req.body);
@@ -50,10 +50,9 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
       });
   
     } catch (err) {
-        throw err
-    }
+      handleError(err, res)
   };
-  
+} 
 
 export const getPostById = async (req: Request, res: Response): Promise<void> => {
   const { error } = idSchemaPost.validate(req.params);
@@ -93,7 +92,7 @@ export const getPostById = async (req: Request, res: Response): Promise<void> =>
       data: postResponse,
     });
   } catch (err) {
-        throw err
+    handleError(err, res)
   }
 };
 
@@ -138,6 +137,5 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
             },
         });
     } catch (err) {
-        throw err
-    }
-};
+      handleError(err, res)
+}}

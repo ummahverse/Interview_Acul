@@ -1,25 +1,25 @@
 import { Request, Response } from 'express';
 import { users } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { userLogin, userRegister } from '../validation/auth.validate';
 import argon2 from 'argon2';
 import { LoginResponse } from '../types/auth.type';
 import jwt from 'jsonwebtoken';
 import prisma from '../libs/prisma.lib';
-import { ErrorWithStatusCode } from '../errors/error';
+import { ErrorWithStatusCode, handleError } from '../errors/error';
 
-export const registerUser = async (req: Request, res: Response):Promise<void> => {
-  const { error } = userRegister.validate(req.body);
+export const registerUser = async (req: Request, res: Response) => {
   
-  if (error) {
-    throw new ErrorWithStatusCode(error.details[0].message, 400)
-  }
-
-  const { username, email, password } = req.body;
-
-  const hashedPassword = await argon2.hash(password);
-
   try {
+
+    const { error } = userRegister.validate(req.body);
+  
+    if (error) {
+      throw new ErrorWithStatusCode(error.details[0].message, 400)
+    }
+  
+    const { username, email, password } = req.body;
+  
+    const hashedPassword = await argon2.hash(password);
     
     const user = await prisma.users.create({
       data: {
@@ -45,43 +45,25 @@ export const registerUser = async (req: Request, res: Response):Promise<void> =>
       data: null,
     });
 
-  } catch (err) {
-    if (err instanceof PrismaClientKnownRequestError) {
-        switch (err.code) {
-          case 'P2002':
-            res.status(400).json({
-              status: false,
-              message: 'Username or email already exists',
-              data: null,
-            });
-
-          default:
-            res.status(500).json({
-              status: false,
-              message: 'An unexpected error occurred',
-              data: null,
-            });
-        }
-      }
-  
-      throw err;
-    }
-};
+  } catch (err : unknown) {
+    handleError(err, res)
+}};
 
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
-  const { error } = userLogin.validate(req.body);
-
-  if (error) {
-    throw new ErrorWithStatusCode(error.details[0].message, 400);
-  }
-
-  const { username, email, password } = req.body;
-
-  // if ((username && email) || (!username && !email)) {
-  //   throw new ErrorWithStatusCode('Please provide either username or email, but not both.', 400);
-  // }
-
   try {
+
+    const { error } = userLogin.validate(req.body);
+
+    if (error) {
+      throw new ErrorWithStatusCode(error.details[0].message, 400);
+    }
+  
+    const { username, email, password } = req.body;
+  
+    if ((username && email) || (!username && !email)) {
+      throw new ErrorWithStatusCode('Please provide either username or email, but not both.', 400);
+    }
+
     const user: users | null = await prisma.users.findUnique({
       where: {
         username: username || undefined,
@@ -108,7 +90,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       {
         id: user.id,
       },
-      process.env.JWT_SECRET!, 
+      process.env.JWT_SECRET as string, 
       { algorithm: 'HS512', expiresIn: '1h' } 
     );
 
@@ -120,17 +102,6 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       },
     } as LoginResponse);
   } catch (err) {
-    if (err instanceof PrismaClientKnownRequestError) {
-      switch (err.code) {
-        default:
-          res.status(500).json({
-            status: false,
-            message: 'An unexpected error occurred',
-            data: null,
-          });
-      }
-    }
-
-    throw err;
+    handleError(err, res)
   }
 };

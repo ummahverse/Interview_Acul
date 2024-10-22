@@ -42,13 +42,6 @@ export const userLogin = Joi.object({
       'string.email': 'Email must be a valid email address.',
       'string.max': 'Email cannot be longer than 50 characters.',
     }),
-
-  // Ensure at least one of 'username' or 'email' is provided
-}).xor('username', 'email')
-  .messages({
-    'object.missing': 'Please provide either username or email.',
-  })
-  .append({
     password: Joi.string().min(6).max(120).required()
       .messages({
         'string.base': 'Password must be a string.',

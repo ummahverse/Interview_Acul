@@ -4,7 +4,7 @@ info:
   description: Full documentation API for Social Media Project
   version: 1.0.0
 servers:
-  - url: http://localhost:3001/api/v1
+  - url: http://localhost:3000/api/v1
     description: Local development server
 tags:
   - name: Authentication
@@ -16,5 +16,528 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
 paths:
   /auth/signup:
+    post:
+      tags:
+        - Authentication
+      summary: Create a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: johndoe
+                email:
+                  type: string
+                  example: johndoe@example.com
+                password:
+                  type: string
+                  example: Password123!
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User created successfully
+                  data:
+                    type: object
+                    nullable: true
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid Email
+                  data:
+                    type: object
+                    nullable: true
+        '409':
+          description: username/email conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Username or email already exists
+                  data:
+                    type: object
+                    nullable: true
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal Server Error
+                  data:
+                    type: object
+                    nullable: true
+
+  /auth/signin:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: johndoe
+                email:
+                  type: string
+                  example: johndoe@example.com
+                password:
+                  type: string
+                  example: Password123!
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Login successful.
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid input.
+                  data:
+                    type: object
+                    nullable: true
+        '401':
+          description: Unauthorized - invalid password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid password.
+                  data:
+                    type: object
+                    nullable: true
+        '404':
+          description: Not found - user not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User not found.
+                  data:
+                    type: object
+                    nullable: true
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal Server Error
+                  data:
+                    type: object
+                    nullable: true
+  /post:
+    post:
+      tags:
+        - Post
+      summary: Create a new post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                caption:
+                  type: string
+                  example: "My first post!"
+                is_public:
+                  type: boolean
+                  example: true
+                location:
+                  type: string
+                  example: "New York"
+      responses:
+        '201':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Post created successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      caption:
+                        type: string
+                        example: "My first post!"
+                      user_id:
+                        type: integer
+                        example: 1
+                      is_public:
+                        type: boolean
+                        example: true
+                      location:
+                        type: string
+                        example: "New York"
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: "2024-10-22T14:48:00Z"
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Caption must be at least 1 character long.
+                  data:
+                    type: object
+                    nullable: true
+        '401':
+          description: Unauthorized - invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthorized.
+                  data:
+                    type: object
+                    nullable: true
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal Server Error
+                  data:
+                    type: object
+                    nullable: true
+    get:
+      tags:
+        - Post
+      summary: Retrieve a paginated list of posts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: The page number to retrieve (default is 1)
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          description: The number of posts per page (default is 10)
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: Posts fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Posts fetched successfully
+                  data:
+                    type: object
+                    properties:
+                      posts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            caption:
+                              type: string
+                              example: "My first post!"
+                            user_id:
+                              type: integer
+                              example: 1
+                            is_public:
+                              type: boolean
+                              example: true
+                            location:
+                              type: string
+                              example: "New York"
+                            created_at:
+                              type: string
+                              format: date-time
+                              example: "2024-10-22T14:48:00Z"
+                      pagination:
+                        type: object
+                        properties:
+                          totalPosts:
+                            type: integer
+                            example: 100
+                          currentPage:
+                            type: integer
+                            example: 1
+                          totalPages:
+                            type: integer
+                            example: 10
+                          limit:
+                            type: integer
+                            example: 10
+        '401':
+          description: Unauthorized - invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthorized.
+                  data:
+                    type: object
+                    nullable: true
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal Server Error
+                  data:
+                    type: object
+                    nullable: true
+  /post/{id}:
+    get:
+      tags:
+        - Post
+      summary: Retrieve a post by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the post to retrieve
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Post fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Post fetched successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      caption:
+                        type: string
+                        example: "My first post!"
+                      user_id:
+                        type: integer
+                        example: 1
+                      is_public:
+                        type: boolean
+                        example: true
+                      location:
+                        type: string
+                        example: "New York"
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: "2024-10-22T14:48:00Z"
+        '400':
+          description: Bad request - invalid ID format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Invalid ID format."
+                  data:
+                    type: object
+                    nullable: true
+        '404':
+          description: Not found - post does not exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Post not found."
+                  data:
+                    type: object
+                    nullable: true
+        '401':
+          description: Unauthorized - invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unauthorized.
+                  data:
+                    type: object
+                    nullable: true
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal Server Error
+                  data:
+                    type: object
+                    nullable: true
