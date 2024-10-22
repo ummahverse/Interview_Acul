@@ -1,12 +1,11 @@
 import { Request, Response } from 'express';
-import { PrismaClient, users } from '@prisma/client';
+import { users } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { userLogin, userRegister } from '../validation/auth.validate';
 import argon2 from 'argon2';
 import { LoginResponse } from '../types/auth.type';
 import jwt from 'jsonwebtoken';
-
-const prisma = new PrismaClient();
+import prisma from '../libs/prisma.lib';
 
 export const registerUser = async (req: Request, res: Response):Promise<void> => {
   const { error } = userRegister.validate(req.body);
@@ -68,9 +67,9 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
 
   const { username, email, password } = req.body;
 
-  if ((username && email) || (!username && !email)) {
-    throw new ErrorWithStatusCode('Please provide either username or email, but not both.', 400);
-  }
+  // if ((username && email) || (!username && !email)) {
+  //   throw new ErrorWithStatusCode('Please provide either username or email, but not both.', 400);
+  // }
 
   try {
     const user: users | null = await prisma.users.findUnique({

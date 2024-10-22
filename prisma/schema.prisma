@@ -37,6 +37,7 @@ model post {
   user_id        Int
   is_public      Boolean         @default(false)
   location       String?
+  created_at    DateTime         @default(now())
 
   users          users           @relation(fields: [user_id], references: [id])
 }
